@@ -14,7 +14,7 @@ An intelligent tool that uses Large Language Models (LLMs) to evaluate student G
 
 ![Application Interface](docs/screenshot.png)
 
-*Interface de l'application web montrant l'évaluation d'un projet GitHub avec un score de 85/100, les informations du dépôt, et une analyse détaillée des forces, faiblesses et fonctionnalités manquantes.*
+*Web application interface showing the evaluation of a GitHub project with a score of 85/100, repository information, and a detailed analysis of strengths, weaknesses, and missing features.*
 
 ## Installation
 
