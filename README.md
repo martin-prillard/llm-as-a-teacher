@@ -10,6 +10,12 @@ An intelligent tool that uses Large Language Models (LLMs) to evaluate student G
 - 📊 **Detailed Scoring**: Provides scores from 0-100 with comprehensive explanations
 - 🎯 **Comprehensive Analysis**: Evaluates functionality, code quality, completeness, architecture, and documentation
 
+## Screenshot
+
+![Application Interface](docs/screenshot.png)
+
+*Interface de l'application web montrant l'évaluation d'un projet GitHub avec un score de 85/100, les informations du dépôt, et une analyse détaillée des forces, faiblesses et fonctionnalités manquantes.*
+
 ## Installation
 
 ### Prerequisites
