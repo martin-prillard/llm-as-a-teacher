@@ -38,12 +38,6 @@ def main():
         help="Output file path for the evaluation report (optional)"
     )
     parser.add_argument(
-        "--model",
-        type=str,
-        default="gpt-4o",
-        help="LLM model to use for evaluation (default: gpt-4o)"
-    )
-    parser.add_argument(
         "--api-key",
         type=str,
         default=None,
@@ -79,7 +73,6 @@ def main():
             # Evaluate the project
             print("🤖 Evaluating project with LLM...")
             evaluator = ProjectEvaluator(
-                model=args.model,
                 api_key=args.api_key
             )
             

@@ -93,6 +93,8 @@ class ProjectEvaluator:
         """Create the evaluation prompt for the LLM."""
         prompt = f"""You are an expert code evaluator. Your task is to evaluate a GitHub project against a project description and provide a score from 0 to 100.
 
+CRITICAL: You must evaluate the project STRICTLY based on the requirements specified in the project description. Do NOT apply generic best practices, coding standards, or criteria that are not explicitly mentioned in the project description. Your evaluation should focus exclusively on whether the code fulfills the requirements stated in the project description.
+
 PROJECT DESCRIPTION:
 {description}
 
@@ -104,28 +106,22 @@ REPOSITORY INFORMATION:
 SOURCE CODE:
 {code_context}
 
-EVALUATION CRITERIA:
-1. Functionality: Does the code implement the features described in the project description?
-2. Code Quality: Is the code well-structured, readable, and follows best practices?
-3. Completeness: Are all required components present and functional?
-4. Architecture: Is the project structure appropriate for the described functionality?
-5. Documentation: Is there adequate documentation (comments, README, etc.)?
-
-INSTRUCTIONS:
-1. Analyze the source code against the project description
-2. Evaluate each criterion above
-3. Provide a score from 0 to 100 (where 100 is perfect alignment with the description)
-4. Write a detailed explanation justifying your score
-5. Highlight specific strengths and weaknesses
-6. Mention any missing features or areas for improvement
+EVALUATION INSTRUCTIONS:
+1. Extract all requirements, features, and expectations from the project description
+2. Analyze the source code to determine which requirements are implemented
+3. Compare each requirement from the project description against the implemented code
+4. Provide a score from 0 to 100 based SOLELY on how well the code meets the requirements specified in the project description (where 100 means all requirements are fully met)
+5. Write a detailed explanation justifying your score, referencing specific requirements from the project description
+6. Highlight which requirements are met and which are missing or incomplete
+7. Do NOT penalize for things not mentioned in the project description (e.g., code quality standards, architecture patterns, documentation practices that aren't required)
 
 RESPONSE FORMAT (JSON):
 {{
     "score": <number between 0 and 100>,
-    "explanation": "<detailed explanation of the evaluation>",
-    "strengths": ["<strength 1>", "<strength 2>", ...],
-    "weaknesses": ["<weakness 1>", "<weakness 2>", ...],
-    "missing_features": ["<missing feature 1>", ...]
+    "explanation": "<detailed explanation of the evaluation, referencing specific requirements from the project description>",
+    "strengths": ["<requirement 1 that is well implemented>", "<requirement 2 that is well implemented>", ...],
+    "weaknesses": ["<requirement 1 that is missing or incomplete>", "<requirement 2 that is missing or incomplete>", ...],
+    "missing_features": ["<missing requirement 1 from project description>", ...]
 }}
 
 Provide your evaluation in valid JSON format:"""

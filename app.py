@@ -20,7 +20,6 @@ from git_handler import GitHandler
 def evaluate_project(
     git_url: str,
     api_key: str,
-    model: str,
     description_file,
     description_text: str
 ):
@@ -30,21 +29,20 @@ def evaluate_project(
     Args:
         git_url: GitHub repository URL
         api_key: OpenAI API key
-        model: LLM model to use
         description_file: Uploaded file object
         description_text: Text description input
         
     Returns:
-        Tuple of (score, explanation, repo_info)
+        Markdown string with evaluation results
     """
     try:
         # Validate inputs
         if not git_url or not git_url.strip():
-            return None, "❌ Error: GitHub URL is required", None
+            return "❌ Error: GitHub URL is required"
         
         api_key = api_key.strip() if api_key else os.getenv('OPENAI_API_KEY')
         if not api_key:
-            return None, "❌ Error: OpenAI API key is required", None
+            return "❌ Error: OpenAI API key is required"
         
         # Handle description: either uploaded file or text input
         description = None
@@ -60,10 +58,10 @@ def evaluate_project(
         elif description_text and description_text.strip():
             description = description_text.strip()
         else:
-            return None, "❌ Error: Project description is required (file upload or text input)", None
+            return "❌ Error: Project description is required (file upload or text input)"
         
         if not description:
-            return None, "❌ Error: Could not parse project description", None
+            return "❌ Error: Could not parse project description"
         
         # Access GitHub repository
         git_handler = GitHandler()
@@ -71,10 +69,10 @@ def evaluate_project(
             repo_info = git_handler.get_repository_info(git_url.strip())
             
             if not repo_info:
-                return None, "❌ Error: Could not access GitHub repository. Please check the URL.", None
+                return "❌ Error: Could not access GitHub repository. Please check the URL."
             
             # Evaluate the project
-            evaluator = ProjectEvaluator(model=model, api_key=api_key)
+            evaluator = ProjectEvaluator(api_key=api_key)
             result = evaluator.evaluate(repo_info, description)
             
             # Prepare response
@@ -89,7 +87,7 @@ def evaluate_project(
             # Format the output
             output_text = f"""# 📊 Evaluation Results
 
-## 🎯 Score: {score}/100
+## Evaluation score (0-100): {score}/100
 
 ### Repository Information
 - **Repository**: [{repo_name}]({repo_url})
@@ -101,7 +99,7 @@ def evaluate_project(
 {explanation}
 """
             
-            return score, output_text, f"✅ Successfully evaluated {repo_name}"
+            return output_text
         finally:
             # Clean up
             git_handler.cleanup()
@@ -115,13 +113,19 @@ def evaluate_project(
         import traceback
         error_msg = str(e)
         traceback.print_exc()
-        return None, f"❌ Error: {error_msg}", None
+        return f"❌ Error: {error_msg}"
 
 
 def create_interface():
     """Create and configure the Gradio interface."""
     
     with gr.Blocks(title="LLM as a Teacher - Project Evaluator") as demo:
+        # CSS to hide the Gradio footer
+        gr.HTML(
+            value="<style>footer {display: none !important;} .gradio-footer {display: none !important;}</style>",
+            visible=False
+        )
+        
         gr.Markdown(
             """
             # 🤖 LLM as a Teacher
@@ -147,13 +151,6 @@ def create_interface():
                 )
                 gr.Markdown("*Your OpenAI API key for LLM evaluation*")
                 
-                model = gr.Dropdown(
-                    label="LLM Model",
-                    choices=["gpt-4o", "gpt-4-turbo", "gpt-4", "gpt-3.5-turbo"],
-                    value="gpt-4o"
-                )
-                gr.Markdown("*Select the LLM model for evaluation*")
-                
                 with gr.Tabs():
                     with gr.Tab("Upload File"):
                         description_file = gr.File(
@@ -171,51 +168,34 @@ def create_interface():
                         gr.Markdown("*Enter the project description as text*")
                 
                 evaluate_btn = gr.Button("Evaluate Project", variant="primary", size="lg")
+                
+                gr.Markdown("---")
+                gr.Markdown(
+                    """
+                    ### Evaluation Criteria
+                    
+                    The evaluation is **strictly based on the expected requirements** specified in the uploaded project description file. The tool evaluates projects by:
+                    
+                    1. **Extracting Requirements**: Parses the project description to identify all specified requirements, features, and expectations
+                    2. **Code Analysis**: Analyzes the source code from the GitHub repository
+                    3. **Requirement Matching**: Compares the implemented code against each requirement from the project description
+                    4. **Scoring**: Generates a score (0-100) based solely on how well the code meets the requirements specified in the project description
+                    
+                    **Important**: The evaluation focuses exclusively on whether the code fulfills the requirements stated in the project description. It does not apply generic best practices or criteria that are not mentioned in the project description.
+                    """
+                )
             
             with gr.Column(scale=1):
-                score_output = gr.Number(
-                    label="Score",
-                    value=None
-                )
-                gr.Markdown("*Evaluation score (0-100)*")
-                
                 gr.Markdown("### Evaluation Results")
                 results_output = gr.Markdown(
                     value="Results will appear here after evaluation..."
-                )
-                
-                status_output = gr.Textbox(
-                    label="Status",
-                    value="Ready to evaluate",
-                    interactive=False
                 )
         
         # Set up the evaluation function
         evaluate_btn.click(
             fn=evaluate_project,
-            inputs=[git_url, api_key, model, description_file, description_text],
-            outputs=[score_output, results_output, status_output]
-        )
-        
-        gr.Markdown(
-            """
-            ---
-            ### How It Works
-            
-            1. **File Parsing**: The tool parses the project description from PDF, Word, or text files
-            2. **Repository Access**: Accesses the GitHub repository either via API (if token provided) or by cloning
-            3. **Code Analysis**: Extracts and analyzes source code files from the repository
-            4. **LLM Evaluation**: Uses an LLM to compare the code against the project description
-            5. **Scoring**: Generates a score (0-100) with detailed explanations
-            
-            ### Evaluation Criteria
-            
-            - **Functionality**: Does the code implement the features described?
-            - **Code Quality**: Is the code well-structured and follows best practices?
-            - **Completeness**: Are all required components present?
-            - **Architecture**: Is the project structure appropriate?
-            - **Documentation**: Is there adequate documentation?
-            """
+            inputs=[git_url, api_key, description_file, description_text],
+            outputs=[results_output]
         )
     
     return demo

@@ -81,7 +81,6 @@ http://localhost:7860
 3. Fill in the form:
    - Enter the GitHub repository URL
    - Provide your OpenAI API key (or set `OPENAI_API_KEY` environment variable)
-   - Select the LLM model
    - Upload a project description file OR paste the description text
    - Click "Evaluate Project"
 
@@ -119,7 +118,7 @@ uv run python main.py https://github.com/user/project.git description.docx --out
 
 Evaluate with a text file:
 ```bash
-uv run python main.py https://github.com/user/project.git description.txt --model gpt-4o --api-key sk-...
+uv run python main.py https://github.com/user/project.git description.txt --api-key sk-...
 ```
 
 **Command Line Arguments:**
@@ -127,26 +126,18 @@ uv run python main.py https://github.com/user/project.git description.txt --mode
 - `git_url`: URL of the GitHub repository to evaluate (required)
 - `description_file`: Path to the project description file (PDF, Word, or text) (required)
 - `--output`: Optional path to save the evaluation report
-- `--model`: LLM model to use (default: `gpt-4o`)
 - `--api-key`: OpenAI API key (optional if `OPENAI_API_KEY` env var is set)
-
-## How It Works
-
-1. **File Parsing**: The tool parses the project description from PDF, Word, or text files
-2. **Repository Access**: Accesses the GitHub repository either via API (if token provided) or by cloning
-3. **Code Analysis**: Extracts and analyzes source code files from the repository
-4. **LLM Evaluation**: Uses an LLM to compare the code against the project description
-5. **Scoring**: Generates a score (0-100) with detailed explanations
 
 ## Evaluation Criteria
 
-The tool evaluates projects based on:
+The evaluation is **strictly based on the expected requirements** specified in the uploaded project description file. The tool evaluates projects by:
 
-1. **Functionality**: Does the code implement the features described?
-2. **Code Quality**: Is the code well-structured and follows best practices?
-3. **Completeness**: Are all required components present?
-4. **Architecture**: Is the project structure appropriate?
-5. **Documentation**: Is there adequate documentation?
+1. **Extracting Requirements**: Parses the project description to identify all specified requirements, features, and expectations
+2. **Code Analysis**: Analyzes the source code from the GitHub repository
+3. **Requirement Matching**: Compares the implemented code against each requirement from the project description
+4. **Scoring**: Generates a score (0-100) based solely on how well the code meets the requirements specified in the project description
+
+**Important**: The evaluation focuses exclusively on whether the code fulfills the requirements stated in the project description. It does not apply generic best practices or criteria that are not mentioned in the project description.
 
 ## Project Structure
 
