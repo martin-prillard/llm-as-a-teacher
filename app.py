@@ -6,7 +6,12 @@ Gradio web application for the LLM-based GitHub project evaluator.
 import os
 import tempfile
 from pathlib import Path
+from dotenv import load_dotenv
 import gradio as gr
+
+# Load environment variables from .env file
+load_dotenv()
+
 from evaluator import ProjectEvaluator
 from file_parser import FileParser
 from git_handler import GitHandler

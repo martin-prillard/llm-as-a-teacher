@@ -48,3 +48,4 @@ repo_eval_*/
 .DS_Store
 Thumbs.db
 
+.env

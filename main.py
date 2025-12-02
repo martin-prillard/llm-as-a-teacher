@@ -7,6 +7,11 @@ Evaluates student GitHub projects against project descriptions.
 import argparse
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 from evaluator import ProjectEvaluator
 from file_parser import FileParser
 from git_handler import GitHandler
